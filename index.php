@@ -5,11 +5,9 @@
  * 
  * Handles OAuth authentication for Sveltia CMS (GitHub, GitLab, extensible for more providers)
  * Based on: https://github.com/sveltia/sveltia-cms-auth
+ * License: MIT
+ * See README.md for usage details.
  * 
- * Environment variables required:
- * - GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET (for GitHub)
- * - GITLAB_CLIENT_ID and GITLAB_CLIENT_SECRET (for GitLab)
- * - ALLOWED_DOMAINS (optional, comma-separated)
  */
 
 // ============================================================================
