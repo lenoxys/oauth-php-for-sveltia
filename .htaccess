@@ -2,7 +2,7 @@
     RewriteEngine On
     RewriteBase /oauth/
     
-    # Protect debug log from direct access
+    # Block debug.log left over from older versions (now logged via error_log only)
     RewriteRule ^debug\.log$ - [F,L]
     
     # If the requested file or directory does not exist
@@ -17,8 +17,3 @@
 <IfModule mod_dir.c>
     DirectoryIndex index.php
 </IfModule>
-
-# Deny direct access to debug log
-<Files "debug.log">
-    Deny from all
-</Files>

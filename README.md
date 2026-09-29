@@ -35,7 +35,7 @@ git submodule add https://github.com/lenoxys/oauth-php-for-sveltia.git static/oa
 - `ALLOWED_DOMAINS` **(required)** — comma-separated domains (supports leading `*.` patterns).
 - `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` — for GitHub provider.
 - `GITLAB_CLIENT_ID`, `GITLAB_CLIENT_SECRET`, `GITLAB_HOSTNAME` — for GitLab (hostname defaults to `gitlab.com`).
-- `DEBUG_OAUTH=1` enables sanitized debug logging.
+- `DEBUG_OAUTH=1` enables sanitized debug logging to the PHP error log.
 
 Set these in your PHP environment (.env, PHP-FPM, Apache, etc.).
 
@@ -85,8 +85,11 @@ Notes:
 static/oauth/
 ├─ index.php
 ├─ .htaccess
+├─ test.php
 └─ README.md
 ```
+
+Requires PHP 8.0+ with cURL. Run the self-check with `php -d zend.assertions=1 -d assert.exception=1 test.php` (CLI only; it exits when requested over HTTP).
 
 ---
 
