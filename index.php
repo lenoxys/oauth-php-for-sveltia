@@ -117,12 +117,12 @@ function is_domain_allowed($domain, $allowed_domains)
 
     foreach (explode(',', $allowed_domains) as $pattern) {
         $pattern = trim($pattern);
-        $wildcard = strpos($pattern, '*.') === 0;
+        $wildcard = str_starts_with($pattern, '*.');
         $base = $pattern === '' ? false : ascii_hostname($wildcard ? substr($pattern, 2) : $pattern);
         if (!$base) {
             continue;
         }
-        if ($domain === $base || ($wildcard && substr($domain, -strlen($base) - 1) === '.' . $base)) {
+        if ($domain === $base || ($wildcard && str_ends_with($domain, '.' . $base))) {
             return true;
         }
     }
@@ -263,7 +263,7 @@ function handle_callback()
     $error = $data['error'] ?? '';
     $scope = $data['scope'] ?? '';
 
-    if ($token && $scope && strpos($scope, $provider['scope']) === false) {
+    if ($token && $scope && !str_contains($scope, $provider['scope'])) {
         debug_log('Callback - Scope validation failed. Got: ' . $scope);
         return output_html($name, ['error' => 'Insufficient permissions granted. Please ensure you grant repository access.', 'errorCode' => 'INSUFFICIENT_SCOPE']);
     }
