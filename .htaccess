@@ -17,8 +17,3 @@
 <IfModule mod_dir.c>
     DirectoryIndex index.php
 </IfModule>
-
-# Deny direct access to debug log
-<Files "debug.log">
-    Deny from all
-</Files>

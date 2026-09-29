@@ -85,8 +85,11 @@ Notes:
 static/oauth/
 ├─ index.php
 ├─ .htaccess
+├─ test.php
 └─ README.md
 ```
+
+Requires PHP 7.4+ with cURL. Run the self-check with `php -d zend.assertions=1 -d assert.exception=1 test.php` (CLI only; it exits when requested over HTTP).
 
 ---
 
