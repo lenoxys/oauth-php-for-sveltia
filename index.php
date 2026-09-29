@@ -52,9 +52,7 @@ function debug_log($message)
     if (empty(env('DEBUG_OAUTH', false))) {
         return;
     }
-    $message = sanitize_debug_message($message);
-    @file_put_contents(__DIR__ . '/debug.log', '[' . date('Y-m-d H:i:s') . "] {$message}\n", FILE_APPEND);
-    error_log($message);
+    error_log('sveltia-oauth: ' . sanitize_debug_message($message));
 }
 
 /**
@@ -133,12 +131,10 @@ function is_domain_allowed($domain, $allowed_domains)
 
 function set_csrf_cookie($value, $max_age)
 {
+    // No Domain attribute: host-only, so subdomains can't read or plant it
     $flags = 'HttpOnly; SameSite=Lax; Path=/oauth/; Max-Age=' . intval($max_age);
     if (is_https()) {
         $flags = 'Secure; ' . $flags;
-    }
-    if (!empty($_SERVER['HTTP_HOST'])) {
-        $flags .= '; Domain=' . $_SERVER['HTTP_HOST'];
     }
     header("Set-Cookie: csrf-token={$value}; {$flags}", false);
 }
@@ -151,9 +147,16 @@ function output_html($provider, $payload)
     $nonce = bin2hex(random_bytes(16));
     $state = isset($payload['error']) ? 'error' : 'success';
     $content = json_encode(['provider' => $provider] + $payload);
+    // Emit as a JS string literal; hex-escaping keeps quotes and "</script>" inert
+    $js = function ($value) {
+        return json_encode($value, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+    };
+    $authorizing = $js("authorizing:{$provider}");
+    $message = $js("authorization:{$provider}:{$state}:{$content}");
 
     set_csrf_cookie('deleted', 0);
     header('Content-Type: text/html; charset=UTF-8');
+    header('Cache-Control: no-store');
     header('X-Content-Type-Options: nosniff');
     header('X-Frame-Options: SAMEORIGIN');
     header('Referrer-Policy: no-referrer');
@@ -173,16 +176,11 @@ function output_html($provider, $payload)
 <script nonce="{$nonce}">
 (() => {
   window.addEventListener('message', ({ data, origin }) => {
-    if (data === 'authorizing:$provider') {
-      if (origin === window.location.origin) {
-        window.opener?.postMessage(
-          'authorization:$provider:$state:$content',
-          origin
-        );
-      }
+    if (data === {$authorizing} && origin === window.location.origin) {
+      window.opener?.postMessage({$message}, origin);
     }
   });
-  window.opener?.postMessage('authorizing:$provider', window.location.origin);
+  window.opener?.postMessage({$authorizing}, window.location.origin);
 })();
 </script>
 </body>

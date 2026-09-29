@@ -34,4 +34,15 @@ assert(is_public_ip('140.82.112.3'));
 assert(strpos(sanitize_debug_message('?code=abc&state=def'), 'abc') === false);
 assert(strpos(sanitize_debug_message(['client_secret' => 's3cr3t']), 's3cr3t') === false);
 
+// Hostile error text must stay inside the JS string and survive the JSON round-trip
+$error = "it's \"bad\" </script><script>alert(1)</script> & \\n";
+ob_start();
+output_html('github', ['error' => $error, 'errorCode' => 'X']);
+$html = ob_get_clean();
+assert(substr_count($html, '</script>') === 1);
+assert(preg_match('/postMessage\((".*?"), origin\)/', $html, $m) === 1);
+$message = json_decode($m[1]);
+assert(strpos($message, 'authorization:github:error:') === 0);
+assert(json_decode(substr($message, strlen('authorization:github:error:')), true)['error'] === $error);
+
 echo "ok\n";
